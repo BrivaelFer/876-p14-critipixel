@@ -2,7 +2,7 @@
 
 namespace App\Doctrine\DataFixtures;
 
-use App\Model\Entity\User;
+use App\Model\Entity\Tag;
 use App\Model\Entity\VideoGame;
 use App\Rating\CalculateAverageRating;
 use App\Rating\CountRatingsPerValue;
@@ -18,14 +18,12 @@ final class VideoGameFixtures extends Fixture implements DependentFixtureInterfa
 {
     public function __construct(
         private readonly Generator $faker,
-        private readonly CalculateAverageRating $calculateAverageRating,
-        private readonly CountRatingsPerValue $countRatingsPerValue
     ) {
     }
 
     public function load(ObjectManager $manager): void
     {
-        $users = $manager->getRepository(User::class)->findAll();
+        $tags = $manager->getRepository(Tag::class)->findAll();
 
         $videoGames = array_fill_callback(0, 50, fn (int $index): VideoGame => (new VideoGame)
             ->setTitle(sprintf('Jeu vidéo %d', $index))
@@ -37,7 +35,7 @@ final class VideoGameFixtures extends Fixture implements DependentFixtureInterfa
             ->setImageSize(2_098_872)
         );
 
-        // TODO : Ajouter les tags aux vidéos
+        $this->addTags($videoGames, $tags);
 
         array_walk($videoGames, [$manager, 'persist']);
 
@@ -49,6 +47,20 @@ final class VideoGameFixtures extends Fixture implements DependentFixtureInterfa
 
     public function getDependencies(): array
     {
-        return [UserFixtures::class];
+        return [TagFixtures::class];
+    }
+
+    private function addTags(array $videoGames, array $tags): void
+    {
+        @mt_srand(12);
+        /** @var VideoGame $videoGame */
+        foreach($videoGames as $videoGame)
+        {
+            $coll = $videoGame->getTags();
+            $nTag = rand(1, 4);
+            for ($i = 0; $i < $nTag; $i++) {
+                $coll->add($tags[rand(0, count($tags) - 1)]);
+            }
+        }
     }
 }
