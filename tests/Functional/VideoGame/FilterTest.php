@@ -80,6 +80,31 @@ final class FilterTest extends FunctionalTestCase
         }
     }
 
+    /**
+     * @dataProvider notExistingTagsDataProvider
+     */
+    public function testNotExistingTags(string $route, array $tags): void
+    {
+        $this->get($route);
+        self::assertResponseIsSuccessful();
+        self::assertSelectorCount(10, 'article.game-card');
+
+        $crawler = $this->client->getCrawler();
+        $elements = $crawler->filter('.tag:contains("Game Tag 2")');
+        $count = $elements->count();
+
+        self::assertEquals(4, $count);
+
+        $error = false;
+        try {
+            $this->client->submitForm('Filtrer', self::generateTagFiltersSubmit($tags), 'GET');
+        } catch (\Throwable $th) {
+            $error = true;
+        }
+        self::assertTrue($error);
+        
+    }
+
     private function generateTagFiltersSubmit(array $tagIds): array
     {
         $result = [];
@@ -121,6 +146,16 @@ final class FilterTest extends FunctionalTestCase
             [
                 'tagGroup' => [2,4]
             ],
+        ];
+    }
+
+    public static function notExistingTagsDataProvider() : array 
+    {
+        return [
+            [
+                'route' => '/?filter[tags][]=2333',
+                'tags' => [2333]
+            ]
         ];
     }
 }
