@@ -8,6 +8,7 @@ use App\Model\Entity\VideoGame;
 use App\Rating\RatingHandler;
 use Override;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class RatingHandlerTest extends TestCase
 {
@@ -18,6 +19,7 @@ class RatingHandlerTest extends TestCase
         $this->ratingHandler = new RatingHandler();
     }
 
+    #region Tests
     public function testCalculateAverageNoReview(): void
     {
         $vg = new VideoGame();
@@ -27,44 +29,23 @@ class RatingHandlerTest extends TestCase
         $this->assertNull($vg->getAverageRating());
     }
 
-    public function testCalculateAverage(): void
+    /**
+     * @dataProvider calculateAverageDataProvider
+     */
+    public function testCalculateAverage(array $ratings, int $result): void
     {
-        $tests = [
-            [
-                'ratings' => [2, 5],
-                'result' => 4,
-            ],
-            [
-                'ratings' => [1, 1, 1],
-                'result' => 1,
-            ],
-            [
-                'ratings' => [1, 5],
-                'result' => 3,
-            ],
-            [
-                'ratings' => [2, 2, 5, 5],
-                'result' => 4,
-            ],
-            [
-                'ratings' => [1, 2, 3, 4, 5],
-                'result' => 3,
-            ],
-        ];
+        $vg = new VideoGame();
 
-        foreach ($tests as $key => $test) {
-            $vg = new VideoGame();
-
-            $reviews = $vg->getReviews();
-            foreach ($test['ratings'] as $rating) {
-                $review = (new Review())->setRating($rating);
-                $reviews->add($review);
-            }
-
-            $this->ratingHandler->calculateAverage($vg);
-
-            $this->assertSame($test['result'], $vg->getAverageRating(), 'faile test ' . $key);
+        $reviews = $vg->getReviews();
+        foreach ($ratings as $rating) {
+            $review = (new Review())->setRating($rating);
+            $reviews->add($review);
         }
+
+        $this->ratingHandler->calculateAverage($vg);
+
+        $this->assertSame($result, $vg->getAverageRating());
+        
     }
 
     public function testCountRatingsPerValueNoReview(): void
@@ -81,15 +62,16 @@ class RatingHandlerTest extends TestCase
         $this->assertSame(0, $numberOfRatingsPerValue->getNumberOfFive());
     }
 
-    public function testCountRatingsPerValueClear(): void
+    /**
+     * @dataProvider countRatingsPerValueClearDataProvider
+     */
+    public function testCountRatingsPerValueClear(array $ratings): void
     {
-        $test = [1, 3, 3, 2, 4, 1, 5, 5];
-
         $vg = new VideoGame();
 
         $numberOfRatingsPerValue = $vg->getNumberOfRatingsPerValue();
 
-        foreach($test as $rating) {
+        foreach($ratings as $rating) {
             $this->incriseRatingCount($numberOfRatingsPerValue, $rating);
         }
 
@@ -101,43 +83,39 @@ class RatingHandlerTest extends TestCase
         $this->assertSame(0, $numberOfRatingsPerValue->getNumberOfThree());
         $this->assertSame(0, $numberOfRatingsPerValue->getNumberOfFour());
         $this->assertSame(0, $numberOfRatingsPerValue->getNumberOfFive());
-        
     }
 
-    public function testCountRatingsPerValue(): void
+    private static function countRatingsPerValueClearDataProvider() : array 
     {
-        $tests = [
+        return [
             [
-                'results' => [
-                    1 => 2,
-                    2 => 4,
-                    3 => 1,
-                    4 => 3,
-                    5 => 1,
-                ],
-                'ratings' => [1,1, 2,2,2,2, 3, 4,4,4, 5]
+                'ratings' => [1, 3, 3, 2, 4, 1, 5, 5]
             ]
         ];
-        foreach($tests as $test) {
-            $vg = new VideoGame();
-
-            $reviews = $vg->getReviews();
-            
-            foreach($test['ratings'] as $rating) {
-                $review = (new Review())->setRating($rating);
-                $reviews->add($review);
-            }
-
-            $this->ratingHandler->countRatingsPerValue($vg);
-
-            $numberOfRatingsPerValue = $vg->getNumberOfRatingsPerValue();
-            foreach($test['results'] as $rating => $count) {
-                $this->assertSame($count, $this->getRatingCount($numberOfRatingsPerValue, $rating));
-            }
-        }
-        
     }
 
+    /**
+     * @dataProvider countRatingsPerValueDataProvider
+     */
+    public function testCountRatingsPerValue(array $ratings, array $results): void
+    {
+        $vg = new VideoGame();
+
+        $reviews = $vg->getReviews();
+        
+        foreach($ratings as $rating) {
+            $review = (new Review())->setRating($rating);
+            $reviews->add($review);
+        }
+
+        $this->ratingHandler->countRatingsPerValue($vg);
+
+        $numberOfRatingsPerValue = $vg->getNumberOfRatingsPerValue();
+        foreach($results as $rating => $count) {
+            $this->assertSame($count, $this->getRatingCount($numberOfRatingsPerValue, $rating));
+        }
+    }
+    #region private
     private function incriseRatingCount(NumberOfRatingPerValue $numberOfRatingPerValue, int $rating): void
     {
         match ($rating) {
@@ -159,4 +137,49 @@ class RatingHandlerTest extends TestCase
             default => $numberOfRatingPerValue->getNumberOfFive(),
         };
     }
+    #endregion
+    #endregion
+
+    #region Data provider
+    public static function calculateAverageDataProvider(): array
+    {
+        return [
+            [
+                'ratings' => [2, 5],
+                'result' => 4,
+            ],
+            [
+                'ratings' => [1, 1, 1],
+                'result' => 1,
+            ],
+            [
+                'ratings' => [1, 5],
+                'result' => 3,
+            ],
+            [
+                'ratings' => [2, 2, 5, 5],
+                'result' => 4,
+            ],
+            [
+                'ratings' => [1, 2, 3, 4, 5],
+                'result' => 3,
+            ],
+        ];
+    }
+    private static function countRatingsPerValueDataProvider() : array 
+    {
+        return [
+            [
+                'ratings' => [1,1, 2,2,2,2, 3, 4,4,4, 5],
+                'results' => [
+                    1 => 2,
+                    2 => 4,
+                    3 => 1,
+                    4 => 3,
+                    5 => 1,
+                ]
+            ]
+        ];
+    }
+    #endregion
 }

@@ -26,15 +26,13 @@ final class NotationTest extends FunctionalTestCase
         $this->login();
         $this->videoGameRepository = $this->getEntityManager()->getRepository(VideoGame::class);
     }
-    
-    public function testNoteSubmitSuccess(): void
+    /**
+     * @dataProvider noteSubmitSuccessDataProvider
+     */
+    public function testNoteSubmitSuccess(int $gameId, array $values): void
     {
-        $game = $this->videoGameRepository->find(1);
+        $game = $this->videoGameRepository->find($gameId);
         $route = '/' . $game->getSlug();
-        $values = [
-            'review[rating]' => 2,
-            'review[comment]' => 'Test submit 1'
-        ];
 
         $this->get($route);
         self::assertResponseIsSuccessful();
@@ -47,7 +45,7 @@ final class NotationTest extends FunctionalTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorNotExists('form');
 
-        $game = $this->videoGameRepository->find(1);
+        $game = $this->videoGameRepository->find($gameId);
         self::assertTrue($this->reviewInGame(
             $game, 
             $values['review[rating]'], 
@@ -56,44 +54,35 @@ final class NotationTest extends FunctionalTestCase
         
     }
 
-    public function testNoteSubmitFaile(): void
+    /**
+     * @dataProvider noteSubmitFaileDataProvider
+     */
+    public function testNoteSubmitFaile(int $gameId, string $urlParams): void
     {
-        $tests = [
-            [
-                'game' => 4,
-                'values' => [
-                    'review[rating]' => 9,
-                    'review[comment]' => 'Test submit 2',
-                    'urlParams' => '?review[rating]=9'
-                ],
-            ]
-        ];
+        $game = $this->videoGameRepository->find($gameId);
+        $route = '/' . $game->getSlug();
+        $this->get($route);
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('form');
 
-        foreach($tests as $test)
-        {
-            $game = $this->videoGameRepository->find($test['game']);
-            $route = '/' . $game->getSlug();
-            $values =  $test['values'];
-            $this->get($route);
-            self::assertResponseIsSuccessful();
-            self::assertSelectorExists('form');
-
-            $this->get($route. $values['urlParams']);
-            self::assertSelectorExists('form');
-        }
-        
+        $this->get($route. $urlParams);
+        self::assertSelectorExists('form');
     }
 
-    public function testUnConnect()
+    /**
+     * @dataProvider unConnectDataProvider
+     */
+    public function testUnConnect(int $gameId, array $values)
     {
-        $this->get('/auth/logout');
-        $game = $this->videoGameRepository->find(5);
+        $game = $this->videoGameRepository->find($gameId);
         $route = '/' . $game->getSlug();
-        $values = [
-            'review[rating]' => 2,
-            'review[comment]' => 'Test unconnect submit'
-        ];
 
+        $this->get($route);
+        self::assertResponseIsSuccessful();
+        self::assertSelectorExists('form');
+
+        $this->get('/auth/logout');
+       
         $this->get($route);
         self::assertResponseIsSuccessful();
         self::assertSelectorNotExists('form');
@@ -101,7 +90,7 @@ final class NotationTest extends FunctionalTestCase
         $this->client->request('POST', $route, $values);
         self::assertSelectorNotExists('form');
 
-        $game = $this->videoGameRepository->find(5);
+        $game = $this->videoGameRepository->find($gameId);
          self::assertNotTrue($this->reviewInGame(
             $game, 
             $values['review[rating]'], 
@@ -116,5 +105,41 @@ final class NotationTest extends FunctionalTestCase
             if($review->getRating() === $note && $review->getComment() === $comment) return true;
         }
         return false;
+    }
+
+    public static function unConnectDataProvider(): array
+    {
+        return [
+            [
+                'gameId' => 5,
+                'values' => [
+                    'review[rating]' => 2,
+                    'review[comment]' => 'Test unconnect submit'
+                ]
+            ]
+        ];
+    }
+
+    public static function noteSubmitFaileDataProvider(): array 
+    {
+        return [
+            [
+                'gameId' => 4,
+                'urlParams' => '?review[rating]=9'
+            ]
+        ];
+    }
+
+    public static function noteSubmitSuccessDataProvider(): array
+    {
+        return [
+            [
+                'gameId' => 1,
+                'values' => [
+                    'review[rating]' => 2,
+                    'review[comment]' => 'Test submit 1'
+                ]
+            ]
+        ];
     }
 }
