@@ -8,7 +8,6 @@ use App\Doctrine\Repository\VideoGameRepository;
 use App\Model\Entity\Review;
 use App\Model\Entity\VideoGame;
 use App\Tests\Functional\FunctionalTestCase;
-use Doctrine\ORM\EntityRepository;
 use Override;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,18 +15,23 @@ use PHPUnit\Framework\Attributes\DataProvider;
 
 final class NotationTest extends FunctionalTestCase
 {
-    private EntityRepository $videoGameRepository;
-    private KernelBrowser $noLogClien;
+    private VideoGameRepository $videoGameRepository;
 
     #[Override]
     public function setUp(): void
     {
         parent::setUp();
         $this->login();
-        $this->videoGameRepository = $this->getEntityManager()->getRepository(VideoGame::class);
+        /** @var VideoGameRepository $repo */
+        $repo = $this->getEntityManager()->getRepository(VideoGame::class);
+        $this->videoGameRepository = $repo;
     }
     /**
      * @dataProvider noteSubmitSuccessDataProvider
+     * 
+     * @param int $gameId
+     * @param array<string, mixed> $values
+     * @return void
      */
     public function testNoteSubmitSuccess(int $gameId, array $values): void
     {
@@ -71,6 +75,10 @@ final class NotationTest extends FunctionalTestCase
 
     /**
      * @dataProvider unConnectDataProvider
+     * 
+     * @param int $gameId
+     * @param array<string, mixed> $values
+     * @return void
      */
     public function testUnConnect(int $gameId, array $values)
     {
@@ -107,6 +115,12 @@ final class NotationTest extends FunctionalTestCase
         return false;
     }
 
+    /**
+     * @return array<array{
+     *    gameId:int,
+     *    values:array<string, mixed>
+     * }>>
+     */
     public static function unConnectDataProvider(): array
     {
         return [
@@ -120,6 +134,12 @@ final class NotationTest extends FunctionalTestCase
         ];
     }
 
+    /**
+     * @return array<array{
+     *    gameId:int,
+     *    urlParams:string
+     * }>>
+     */
     public static function noteSubmitFaileDataProvider(): array 
     {
         return [
@@ -130,6 +150,12 @@ final class NotationTest extends FunctionalTestCase
         ];
     }
 
+    /**
+     * @return array<array{
+     *    gameId:int,
+     *    values:array<string, mixed>
+     * }>>
+     */
     public static function noteSubmitSuccessDataProvider(): array
     {
         return [

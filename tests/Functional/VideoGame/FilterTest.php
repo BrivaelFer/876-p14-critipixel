@@ -39,6 +39,10 @@ final class FilterTest extends FunctionalTestCase
 
     /**
      * @dataProvider shouldFilterVideoGamesByTagDataProvide
+     * 
+     * @param int[] $tags
+     * @param int $result
+     * @return void
      */
     public function testShouldFilterVideoGamesByTag(array $tags, int $result): void
     {
@@ -63,6 +67,9 @@ final class FilterTest extends FunctionalTestCase
 
     /**
      * @dataProvider resultesHasFilterTagsDataProvider
+     * 
+     * @param int[] $tagGroup
+     * @return void
      */
     public function testResultesHasFilterTags(array $tagGroup): void
     {
@@ -82,6 +89,10 @@ final class FilterTest extends FunctionalTestCase
 
     /**
      * @dataProvider notExistingTagsDataProvider
+     * 
+     * @param string $route
+     * @param int[] $tags
+     * @return void
      */
     public function testNotExistingTags(string $route, array $tags): void
     {
@@ -105,6 +116,11 @@ final class FilterTest extends FunctionalTestCase
         
     }
 
+    /**
+     * Summary of generateTagFiltersSubmit
+     * @param int[] $tagIds
+     * @return array<string, int>
+     */
     private function generateTagFiltersSubmit(array $tagIds): array
     {
         $result = [];
@@ -115,6 +131,12 @@ final class FilterTest extends FunctionalTestCase
         return $result;
     }
 
+    /**
+     * @return array<array{
+     *    tags:int[],
+     *    result:int
+     * }>
+     */
     public static function shouldFilterVideoGamesByTagDataProvide(): array
     {
         return [
@@ -137,6 +159,11 @@ final class FilterTest extends FunctionalTestCase
         ];
     }
 
+    /**
+     * @return array<array{
+     *    tagGroup:int[]
+     * }>
+     */
     public static function resultesHasFilterTagsDataProvider(): array
     {
         return [
@@ -149,6 +176,12 @@ final class FilterTest extends FunctionalTestCase
         ];
     }
 
+    /**
+     * @return array<array{
+     *    route:string,
+     *    tags:int[]
+     * }>
+     */
     public static function notExistingTagsDataProvider() : array 
     {
         return [
