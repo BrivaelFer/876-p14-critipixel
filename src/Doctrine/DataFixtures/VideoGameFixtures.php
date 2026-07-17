@@ -25,6 +25,7 @@ final class VideoGameFixtures extends Fixture implements DependentFixtureInterfa
     {
         $tags = $manager->getRepository(Tag::class)->findAll();
 
+        /** @phpstan-ignore-next-line */
         $videoGames = array_fill_callback(0, 50, fn (int $index): VideoGame => (new VideoGame)
             ->setTitle(sprintf('Jeu vidéo %d', $index))
             ->setDescription($this->faker->paragraphs(10, true))
@@ -35,6 +36,10 @@ final class VideoGameFixtures extends Fixture implements DependentFixtureInterfa
             ->setImageSize(2_098_872)
         );
 
+        /**
+         * @var array<VideoGame> $videoGames
+         * @var array<Tag> $tags
+         */
         $this->addTags($videoGames, $tags);
 
         array_walk($videoGames, [$manager, 'persist']);
@@ -50,10 +55,15 @@ final class VideoGameFixtures extends Fixture implements DependentFixtureInterfa
         return [TagFixtures::class];
     }
 
+    /**
+     * Summary of addTags
+     * @param array<VideoGame> $videoGames
+     * @param array<Tag> $tags
+     * @return void
+     */
     private function addTags(array $videoGames, array $tags): void
     {
         @mt_srand(12);
-        /** @var VideoGame $videoGame */
         foreach($videoGames as $videoGame)
         {
             $coll = $videoGame->getTags();

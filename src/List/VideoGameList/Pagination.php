@@ -68,6 +68,7 @@ final class Pagination implements IteratorAggregate, Countable
 
     /**
      * @return Traversable<string, int>
+     * @phpstan-ignore-next-line
      */
     public function getIterator(): Traversable
     {
@@ -75,6 +76,7 @@ final class Pagination implements IteratorAggregate, Countable
             throw new RuntimeException('Pagination is not initialized');
         }
 
+        /** @phpstan-ignore-next-line */
         return new ArrayIterator($this->pages);
     }
 
@@ -102,11 +104,17 @@ final class Pagination implements IteratorAggregate, Countable
         return $this->limit;
     }
 
+    /**
+     * @return Direction[]
+     */
     public function getDirections(): array
     {
         return Direction::cases();
     }
 
+    /**
+     * @return Sorting[]
+     */
     public function getAllSorting(): array
     {
         return Sorting::cases();

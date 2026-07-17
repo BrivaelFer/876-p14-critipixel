@@ -8,6 +8,7 @@ use App\Doctrine\Repository\VideoGameRepository;
 use App\Model\Entity\Review;
 use App\Model\Entity\VideoGame;
 use App\Tests\Functional\FunctionalTestCase;
+use Doctrine\ORM\EntityRepository;
 use Override;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,16 +16,18 @@ use PHPUnit\Framework\Attributes\DataProvider;
 
 final class NotationTest extends FunctionalTestCase
 {
-    private VideoGameRepository $videoGameRepository;
+    /**
+     * @var EntityRepository<VideoGame>
+     */
+    private EntityRepository $videoGameRepository;
 
     #[Override]
     public function setUp(): void
     {
         parent::setUp();
         $this->login();
-        /** @var VideoGameRepository $repo */
-        $repo = $this->getEntityManager()->getRepository(VideoGame::class);
-        $this->videoGameRepository = $repo;
+        $this->videoGameRepository = $this->getEntityManager()->getRepository(VideoGame::class);
+        
     }
     /**
      * @dataProvider noteSubmitSuccessDataProvider

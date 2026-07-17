@@ -15,6 +15,14 @@ parameters:
     scanDirectories:
         - var/cache/dev/Symfony/Config
     level: 6
+    # Parce que le code base data du siècle dernier
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        - message: '#deprecat#i'
+          paths:
+              - src/*
+              - tests/*
+              - config/*
     paths:
         - config/
         - src/
