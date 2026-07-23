@@ -4,14 +4,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional\VideoGame;
 
-use App\Doctrine\Repository\VideoGameRepository;
 use App\Model\Entity\Review;
 use App\Model\Entity\VideoGame;
 use App\Tests\Functional\FunctionalTestCase;
 use Doctrine\ORM\EntityRepository;
-use Override;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Component\HttpFoundation\Response;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 final class NotationTest extends FunctionalTestCase
@@ -21,25 +17,23 @@ final class NotationTest extends FunctionalTestCase
      */
     private EntityRepository $videoGameRepository;
 
-    #[Override]
+    #[\Override]
     public function setUp(): void
     {
         parent::setUp();
         $this->login();
         $this->videoGameRepository = $this->getEntityManager()->getRepository(VideoGame::class);
-        
     }
+
     /**
      * @dataProvider noteSubmitSuccessDataProvider
-     * 
-     * @param int $gameId
+     *
      * @param array<string, mixed> $values
-     * @return void
      */
     public function testNoteSubmitSuccess(int $gameId, array $values): void
     {
         $game = $this->videoGameRepository->find($gameId);
-        $route = '/' . $game->getSlug();
+        $route = '/'.$game->getSlug();
 
         $this->get($route);
         self::assertResponseIsSuccessful();
@@ -54,11 +48,10 @@ final class NotationTest extends FunctionalTestCase
 
         $game = $this->videoGameRepository->find($gameId);
         self::assertTrue($this->reviewInGame(
-            $game, 
-            $values['review[rating]'], 
+            $game,
+            $values['review[rating]'],
             $values['review[comment]']
         ));
-        
     }
 
     /**
@@ -67,33 +60,33 @@ final class NotationTest extends FunctionalTestCase
     public function testNoteSubmitFaile(int $gameId, string $urlParams): void
     {
         $game = $this->videoGameRepository->find($gameId);
-        $route = '/' . $game->getSlug();
+        $route = '/'.$game->getSlug();
         $this->get($route);
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('form');
 
-        $this->get($route. $urlParams);
+        $this->get($route.$urlParams);
         self::assertSelectorExists('form');
     }
 
     /**
      * @dataProvider unConnectDataProvider
-     * 
-     * @param int $gameId
+     *
      * @param array<string, mixed> $values
+     *
      * @return void
      */
     public function testUnConnect(int $gameId, array $values)
     {
         $game = $this->videoGameRepository->find($gameId);
-        $route = '/' . $game->getSlug();
+        $route = '/'.$game->getSlug();
 
         $this->get($route);
         self::assertResponseIsSuccessful();
         self::assertSelectorExists('form');
 
         $this->get('/auth/logout');
-       
+
         $this->get($route);
         self::assertResponseIsSuccessful();
         self::assertSelectorNotExists('form');
@@ -102,9 +95,9 @@ final class NotationTest extends FunctionalTestCase
         self::assertSelectorNotExists('form');
 
         $game = $this->videoGameRepository->find($gameId);
-         self::assertNotTrue($this->reviewInGame(
-            $game, 
-            $values['review[rating]'], 
+        self::assertNotTrue($this->reviewInGame(
+            $game,
+            $values['review[rating]'],
             $values['review[comment]']
         ));
     }
@@ -112,9 +105,12 @@ final class NotationTest extends FunctionalTestCase
     private function reviewInGame(VideoGame $game, int $note, string $comment): bool
     {
         /** @var Review */
-        foreach($game->getReviews() as $review) {
-            if($review->getRating() === $note && $review->getComment() === $comment) return true;
+        foreach ($game->getReviews() as $review) {
+            if ($review->getRating() === $note && $review->getComment() === $comment) {
+                return true;
+            }
         }
+
         return false;
     }
 
@@ -131,9 +127,9 @@ final class NotationTest extends FunctionalTestCase
                 'gameId' => 5,
                 'values' => [
                     'review[rating]' => 2,
-                    'review[comment]' => 'Test unconnect submit'
-                ]
-            ]
+                    'review[comment]' => 'Test unconnect submit',
+                ],
+            ],
         ];
     }
 
@@ -143,13 +139,13 @@ final class NotationTest extends FunctionalTestCase
      *    urlParams:string
      * }>>
      */
-    public static function noteSubmitFaileDataProvider(): array 
+    public static function noteSubmitFaileDataProvider(): array
     {
         return [
             [
                 'gameId' => 4,
-                'urlParams' => '?review[rating]=9'
-            ]
+                'urlParams' => '?review[rating]=9',
+            ],
         ];
     }
 
@@ -166,9 +162,9 @@ final class NotationTest extends FunctionalTestCase
                 'gameId' => 1,
                 'values' => [
                     'review[rating]' => 2,
-                    'review[comment]' => 'Test submit 1'
-                ]
-            ]
+                    'review[comment]' => 'Test submit 1',
+                ],
+            ],
         ];
     }
 }

@@ -27,8 +27,8 @@ abstract class FunctionalTestCase extends WebTestCase
 
     /**
      * @template T
+     *
      * @param class-string<T> $id
-     * @return object
      */
     protected function service(string $id): object
     {
@@ -36,10 +36,9 @@ abstract class FunctionalTestCase extends WebTestCase
     }
 
     /**
-     * Summary of get
-     * @param string $uri
+     * Summary of get.
+     *
      * @param array<string, mixed> $parameters
-     * @return Crawler
      */
     protected function get(string $uri, array $parameters = []): Crawler
     {

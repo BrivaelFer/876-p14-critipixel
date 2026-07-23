@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Tests\Functional\VideoGame;
 
 use App\Tests\Functional\FunctionalTestCase;
-use App\Twig\Components\Tabs;
 use LDAP\Result;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -39,15 +38,13 @@ final class FilterTest extends FunctionalTestCase
 
     /**
      * @dataProvider shouldFilterVideoGamesByTagDataProvide
-     * 
+     *
      * @param int[] $tags
-     * @param int $result
-     * @return void
      */
     public function testShouldFilterVideoGamesByTag(array $tags, int $result): void
     {
         $this->get('/');
-        $this->client->submitForm( 'Filtrer', self::generateTagFiltersSubmit($tags),'GET');
+        $this->client->submitForm('Filtrer', self::generateTagFiltersSubmit($tags), 'GET');
         self::assertResponseIsSuccessful();
         self::assertSelectorCount($result, 'article.game-card');
     }
@@ -67,9 +64,8 @@ final class FilterTest extends FunctionalTestCase
 
     /**
      * @dataProvider resultesHasFilterTagsDataProvider
-     * 
+     *
      * @param int[] $tagGroup
-     * @return void
      */
     public function testResultesHasFilterTags(array $tagGroup): void
     {
@@ -80,19 +76,17 @@ final class FilterTest extends FunctionalTestCase
 
         $crawler = $this->client->getCrawler();
         $cardCount = $crawler->filter('article.game-card')->count();
-        foreach($tagGroup as $tagId) {
+        foreach ($tagGroup as $tagId) {
             $value = $tagId - 1;
-            $count = $crawler->filter('.tag:contains("Game Tag '. $value . '")')->count();
+            $count = $crawler->filter('.tag:contains("Game Tag '.$value.'")')->count();
             self::assertEquals($cardCount, $count);
         }
     }
 
     /**
      * @dataProvider notExistingTagsDataProvider
-     * 
-     * @param string $route
+     *
      * @param int[] $tags
-     * @return void
      */
     public function testNotExistingTags(string $route, array $tags): void
     {
@@ -113,21 +107,23 @@ final class FilterTest extends FunctionalTestCase
             $error = true;
         }
         self::assertTrue($error);
-        
     }
 
     /**
-     * Summary of generateTagFiltersSubmit
+     * Summary of generateTagFiltersSubmit.
+     *
      * @param int[] $tagIds
+     *
      * @return array<string, int>
      */
     private function generateTagFiltersSubmit(array $tagIds): array
     {
         $result = [];
-        foreach($tagIds as $id) {
+        foreach ($tagIds as $id) {
             $key = $id - 1;
             $result["filter[tags][$key]"] = $id;
         }
+
         return $result;
     }
 
@@ -145,17 +141,17 @@ final class FilterTest extends FunctionalTestCase
                 'result' => 9,
             ],
             [
-                'tags' => [3,4],    
+                'tags' => [3, 4],
                 'result' => 2,
             ],
             [
-                'tags' => [3,6],    
+                'tags' => [3, 6],
                 'result' => 4,
             ],
             [
-                'tags' => [3,6,7],    
+                'tags' => [3, 6, 7],
                 'result' => 1,
-            ]
+            ],
         ];
     }
 
@@ -168,10 +164,10 @@ final class FilterTest extends FunctionalTestCase
     {
         return [
             [
-               'tagGroup' => [3]
+                'tagGroup' => [3],
             ],
             [
-                'tagGroup' => [2,4]
+                'tagGroup' => [2, 4],
             ],
         ];
     }
@@ -182,13 +178,13 @@ final class FilterTest extends FunctionalTestCase
      *    tags:int[]
      * }>
      */
-    public static function notExistingTagsDataProvider() : array 
+    public static function notExistingTagsDataProvider(): array
     {
         return [
             [
                 'route' => '/?filter[tags][]=2333',
-                'tags' => [2333]
-            ]
+                'tags' => [2333],
+            ],
         ];
     }
 }

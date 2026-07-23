@@ -6,9 +6,8 @@ use App\Model\Entity\NumberOfRatingPerValue;
 use App\Model\Entity\Review;
 use App\Model\Entity\VideoGame;
 use App\Rating\RatingHandler;
-use Override;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\TestCase;
 
 class RatingHandlerTest extends TestCase
 {
@@ -19,7 +18,7 @@ class RatingHandlerTest extends TestCase
         $this->ratingHandler = new RatingHandler();
     }
 
-    #region Tests
+    // region Tests
     public function testCalculateAverageNoReview(): void
     {
         $vg = new VideoGame();
@@ -31,10 +30,8 @@ class RatingHandlerTest extends TestCase
 
     /**
      * @dataProvider calculateAverageDataProvider
-     * 
+     *
      * @param array<int> $ratings
-     * @param int $result
-     * @return void
      */
     public function testCalculateAverage(array $ratings, int $result): void
     {
@@ -49,7 +46,6 @@ class RatingHandlerTest extends TestCase
         $this->ratingHandler->calculateAverage($vg);
 
         self::assertSame($result, $vg->getAverageRating());
-        
     }
 
     public function testCountRatingsPerValueNoReview(): void
@@ -68,9 +64,8 @@ class RatingHandlerTest extends TestCase
 
     /**
      * @dataProvider countRatingsPerValueClearDataProvider
-     * 
+     *
      * @param array<int> $ratings
-     * @return void
      */
     public function testCountRatingsPerValueClear(array $ratings): void
     {
@@ -78,13 +73,12 @@ class RatingHandlerTest extends TestCase
 
         $numberOfRatingsPerValue = $vg->getNumberOfRatingsPerValue();
 
-        foreach($ratings as $rating) {
+        foreach ($ratings as $rating) {
             $this->incriseRatingCount($numberOfRatingsPerValue, $rating);
         }
 
         $this->ratingHandler->countRatingsPerValue($vg);
 
-        
         self::assertSame(0, $numberOfRatingsPerValue->getNumberOfOne());
         self::assertSame(0, $numberOfRatingsPerValue->getNumberOfTwo());
         self::assertSame(0, $numberOfRatingsPerValue->getNumberOfThree());
@@ -94,18 +88,17 @@ class RatingHandlerTest extends TestCase
 
     /**
      * @dataProvider countRatingsPerValueDataProvider
-
-     * @param array<int> $ratings
+     *
+     * @param array<int>      $ratings
      * @param array<int, int> $results
-     * @return void
      */
     public function testCountRatingsPerValue(array $ratings, array $results): void
     {
         $vg = new VideoGame();
 
         $reviews = $vg->getReviews();
-        
-        foreach($ratings as $rating) {
+
+        foreach ($ratings as $rating) {
             $review = (new Review())->setRating($rating);
             $reviews->add($review);
         }
@@ -113,11 +106,12 @@ class RatingHandlerTest extends TestCase
         $this->ratingHandler->countRatingsPerValue($vg);
 
         $numberOfRatingsPerValue = $vg->getNumberOfRatingsPerValue();
-        foreach($results as $rating => $count) {
+        foreach ($results as $rating => $count) {
             self::assertSame($count, $this->getRatingCount($numberOfRatingsPerValue, $rating));
         }
     }
-    #region private
+
+    // region private
     private function incriseRatingCount(NumberOfRatingPerValue $numberOfRatingPerValue, int $rating): void
     {
         match ($rating) {
@@ -139,10 +133,10 @@ class RatingHandlerTest extends TestCase
             default => $numberOfRatingPerValue->getNumberOfFive(),
         };
     }
-    #endregion
-    #endregion
+    // endregion
+    // endregion
 
-    #region Data provider
+    // region Data provider
 
     /**
      * @return array<array{ratings:int[], result:int}>
@@ -172,35 +166,37 @@ class RatingHandlerTest extends TestCase
             ],
         ];
     }
+
     /**
      * @return array<array{ratings:int[], results:array<int, int>}>
      */
-    public static function countRatingsPerValueDataProvider() : array 
+    public static function countRatingsPerValueDataProvider(): array
     {
         return [
             [
-                'ratings' => [1,1, 2,2,2,2, 3, 4,4,4, 5],
+                'ratings' => [1, 1, 2, 2, 2, 2, 3, 4, 4, 4, 5],
                 'results' => [
                     1 => 2,
                     2 => 4,
                     3 => 1,
                     4 => 3,
                     5 => 1,
-                ]
-            ]
-        ];
-    }
-    /**
-     * @return array<array{ratings:int[]}>
-     */
-    public static function countRatingsPerValueClearDataProvider() : array 
-    {
-        return [
-            [
-                'ratings' => [1, 3, 3, 2, 4, 1, 5, 5]
-            ]
+                ],
+            ],
         ];
     }
 
-    #endregion
+    /**
+     * @return array<array{ratings:int[]}>
+     */
+    public static function countRatingsPerValueClearDataProvider(): array
+    {
+        return [
+            [
+                'ratings' => [1, 3, 3, 2, 4, 1, 5, 5],
+            ],
+        ];
+    }
+
+    // endregion
 }
